@@ -20,6 +20,15 @@ fn main() {
         }
     }
 
+    println!("Going to sleep!");
+    let sleeping = sdp.go_to_sleep().unwrap();
+
+    println!("Sleeping.");
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
+    let sdp = sleeping.wake_up().unwrap();
+    println!("Woken up!");
+
     let mut sdp_sampling = match sdp.start_sampling_differential_pressure(true) {
         Ok(s) => s,
         Err(e) => {
@@ -27,12 +36,16 @@ fn main() {
             loop {}
         }
     };
+    std::thread::sleep(std::time::Duration::from_millis(100));
+    println!("Starting to take all the samples");
+
     for _ in 0..=50 {
         let result = sdp_sampling.read_continuous_sample();
         match result {
             Ok(r) => println!("{:?}", r),
             Err(e) => println!("Error while getting result: {:?}", e),
         }
+        std::thread::sleep(std::time::Duration::from_millis(10));
     }
     let mut idle_sensor = sdp_sampling.stop_sampling().unwrap();
     loop {
