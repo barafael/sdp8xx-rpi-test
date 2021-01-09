@@ -1,0 +1,9 @@
+[package]
+name = "sdp8xx-rpi-test"
+version = "0.1.0"
+authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+sdp8xx = { path = "/home/ra/sdp8xx" }
+linux-embedded-hal = "*"
