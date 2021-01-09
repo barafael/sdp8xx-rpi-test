@@ -5,5 +5,5 @@ authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-sdp8xx = { path = "/home/ra/sdp8xx" }
-linux-embedded-hal = "*"
+sdp8xx = { git = "https://github.com/barafael/sdp8xx", branch = "main" }
+linux-embedded-hal = "0.3.0"
