@@ -8,12 +8,15 @@ fn main() {
 
     println!("Starting Sdp8xx tests.");
 
-    let product_id = sdp.read_product_id().unwrap();
-    println!("{:?}", product_id);
+    if let Ok(product_id) = sdp.read_product_id() {
+        println!("{:?}", product_id);
+    } else {
+        println!("Could not read product ID.");
+    }
 
     println!("Taking 10 triggered samples");
     for _ in 0..=10 {
-        if let Ok(m) = sdp.read_sample_triggered() {
+        if let Ok(m) = sdp.trigger_differential_pressure_sample() {
             println!("{:?}", m);
         } else {
             println!("Error!");
@@ -21,18 +24,30 @@ fn main() {
     }
 
     println!("Going to sleep!");
-    let sleeping = sdp.go_to_sleep().unwrap();
+    let sleeping = match sdp.go_to_sleep() {
+        Ok(sdp) => { sdp }
+        Err(_) => {
+            println!("Could not go to sleep");
+            loop {}
+        }
+    };
 
     println!("Sleeping.");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    let sdp = sleeping.wake_up().unwrap();
+    let sdp = match sleeping.wake_up() {
+        Ok(woke) => woke,
+        Err(_) => {
+            println!("Could not wake up sensor.");
+            loop {}
+        }
+    };
     println!("Woken up!");
 
     let mut sdp_sampling = match sdp.start_sampling_differential_pressure(true) {
         Ok(s) => s,
-        Err(e) => {
-            println!("{:?}", e);
+        Err(_) => {
+            println!("Could not start sampling.");
             loop {}
         }
     };
@@ -43,13 +58,19 @@ fn main() {
         let result = sdp_sampling.read_continuous_sample();
         match result {
             Ok(r) => println!("{:?}", r),
-            Err(e) => println!("Error while getting result: {:?}", e),
+            Err(_) => println!("Error while getting result."),
         }
         std::thread::sleep(std::time::Duration::from_millis(10));
     }
-    let mut idle_sensor = sdp_sampling.stop_sampling().unwrap();
+    let mut idle_sensor = match sdp_sampling.stop_sampling() {
+        Ok(s) => s,
+        Err(_) => {
+            println!("Couldn't stop sampling.");
+            loop {}
+        }
+    };
     loop {
-        if let Ok(m) = idle_sensor.read_sample_triggered() {
+        if let Ok(m) = idle_sensor.trigger_differential_pressure_sample() {
             println!("{:?}", m);
         } else {
             println!("Error!");
